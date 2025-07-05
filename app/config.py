@@ -1,8 +1,9 @@
-from pydantic import BaseSettings
+from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
-    bot_token: str
-    webhook_url: str
+    BOT_TOKEN: str
+    WEBHOOK_URL: str
+    DATABASE_URL: str
 
     class Config:
         env_file = ".env"
