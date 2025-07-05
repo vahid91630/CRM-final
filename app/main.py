@@ -1,22 +1,31 @@
+import os
 from fastapi import FastAPI
-from app.db import models, database
-from app.routers import customers
-from app.bot.telegram import start_bot
+from dotenv import load_dotenv
 
-app = FastAPI(title="CRM API", version="1.0")
+# Load environment variables from .env file
+load_dotenv()
 
-# ایجاد جداول دیتابیس
-models.Base.metadata.create_all(bind=database.engine)
+# Database models & config (adjusted for being inside 'app/')
+from db import models, database
 
-# ثبت روت‌ها
-app.include_router(customers.router)
+# Telegram Bot router (inside bot/)
+from bot.telegram_bot import telegram_router
 
-# پیام خوش‌آمد در روت اصلی
+# Initialize FastAPI app
+app = FastAPI()
+
+@app.on_event("startup")
+async def startup():
+    await database.database.connect()
+
+@app.on_event("shutdown")
+async def shutdown():
+    await database.database.disconnect()
+
+# Root route
 @app.get("/")
 def root():
-    return {"message": "✅ CRM API فعال است. مستندات در /docs قابل مشاهده است."}
+    return {"message": "✅ CRM API فعال است. برای تست API به مسیر /docs بروید."}
 
-# راه‌اندازی بات تلگرام هنگام استارت پروژه
-@app.on_event("startup")
-async def on_startup():
-    start_bot()
+# Register Telegram router
+app.include_router(telegram_router, prefix="/bot")
