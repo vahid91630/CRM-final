@@ -1,9 +1,6 @@
-from aiogram import Router, types, F
-from aiogram.types import Message
-from aiogram.filters import CommandStart
+from aiogram import types
+from app.bot.telegram import dp
 
-router = Router()
-
-@router.message(CommandStart())
-async def start_handler(message: Message):
-    await message.answer("سلام 👋 به CRM خوش اومدی!\nبرای استفاده از امکانات ربات از دکمه‌ها یا دستورات استفاده کن.")
+@dp.message_handler(commands=['start', 'سلام'])
+async def start_handler(message: types.Message):
+    await message.answer("سلام 👋 من دستیار CRM شما هستم. چطور می‌تونم کمکتون کنم؟")
