@@ -1,9 +1,6 @@
 from aiogram import Bot, Dispatcher
-from aiogram.fsm.storage.memory import MemoryStorage
-from aiogram import Router
-from config import settings
+import os
 
-bot = Bot(token=settings.bot_token, parse_mode="HTML")
-dp = Dispatcher(storage=MemoryStorage())
-router = Router()
-dp.include_router(router)
+BOT_TOKEN = os.getenv("BOT_TOKEN")
+bot = Bot(token=BOT_TOKEN)
+dp = Dispatcher(bot)
