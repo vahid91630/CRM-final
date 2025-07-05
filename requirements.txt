@@ -1,7 +1,5 @@
 fastapi
 uvicorn
-sqlalchemy
-aiogram
-python-dotenv
-requests
 pydantic-settings
+sqlalchemy
+aiosqlite
