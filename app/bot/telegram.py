@@ -1,41 +1,26 @@
-import os
-import requests
 from fastapi import APIRouter, Request
-from dotenv import load_dotenv
+import httpx
+from app.config import BOT_TOKEN
 
-from bot.handlers import handle_text_message
+telegram_router = APIRouter()
 
-load_dotenv()
+TELEGRAM_API_URL = f"https://api.telegram.org/bot{BOT_TOKEN}"
 
-router = APIRouter()
-TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
-BASE_URL = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}"
-
-
-@router.post("/webhook")
-async def telegram_webhook(req: Request):
-    data = await req.json()
-
-    message = data.get("message")
-    if not message:
-        return {"status": "no message"}
-
-    chat_id = message["chat"]["id"]
+@telegram_router.post("/")
+async def receive_update(update: dict):
+    message = update.get("message", {})
+    chat_id = message.get("chat", {}).get("id")
     text = message.get("text", "")
 
-    response_text = handle_text_message(chat_id, text)
-    send_message(chat_id, response_text)
+    if not chat_id or not text:
+        return {"ok": False, "message": "داده نامعتبر"}
 
-    return {"status": "ok"}
+    response_text = f"✅ پیام شما دریافت شد:\n{text}"
 
+    async with httpx.AsyncClient() as client:
+        await client.post(f"{TELEGRAM_API_URL}/sendMessage", json={
+            "chat_id": chat_id,
+            "text": response_text
+        })
 
-def send_message(chat_id: int, text: str) -> None:
-    url = f"{BASE_URL}/sendMessage"
-    payload = {
-        "chat_id": chat_id,
-        "text": text
-    }
-    try:
-        requests.post(url, json=payload)
-    except Exception as e:
-        print("Error sending message:", e)
+    return {"ok": True}
