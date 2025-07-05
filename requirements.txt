@@ -1,6 +1,7 @@
 fastapi
-uvicorn[standard]
+uvicorn
 sqlalchemy
 aiogram
 python-dotenv
 requests
+aiosqlite
