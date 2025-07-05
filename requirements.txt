@@ -1,0 +1,5 @@
+fastapi
+uvicorn
+aiogram
+python-dotenv
+sqlalchemy
