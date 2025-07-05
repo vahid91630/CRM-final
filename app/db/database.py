@@ -1,16 +1,15 @@
-from sqlalchemy import create_engine
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
+from sqlalchemy.orm import DeclarativeBase
 import os
-from dotenv import load_dotenv
 
-load_dotenv()
+DATABASE_URL = os.getenv("DATABASE_URL", "sqlite+aiosqlite:///./crm.db")
 
-DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./crm.db")
+engine = create_async_engine(DATABASE_URL, echo=False)
+async_session = async_sessionmaker(engine, expire_on_commit=False)
 
-engine = create_engine(
-    DATABASE_URL, connect_args={"check_same_thread": False} if "sqlite" in DATABASE_URL else {}
-)
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+class Base(DeclarativeBase):
+    pass
 
-Base = declarative_base()
+async def get_session() -> AsyncSession:
+    async with async_session() as session:
+        yield session
