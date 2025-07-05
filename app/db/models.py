@@ -1,8 +1,10 @@
-from sqlalchemy import Column, Integer, String
-from app.db.database import Base
+from sqlalchemy import String, Integer
+from sqlalchemy.orm import Mapped, mapped_column
+from .database import Base
 
 class Customer(Base):
     __tablename__ = "customers"
-    id = Column(Integer, primary_key=True, index=True)
-    name = Column(String, index=True)
-    phone = Column(String, unique=True, index=True)
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    name: Mapped[str] = mapped_column(String(100))
+    phone: Mapped[str] = mapped_column(String(20), unique=True)
