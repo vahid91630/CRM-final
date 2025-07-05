@@ -3,7 +3,7 @@ from pydantic_settings import BaseSettings
 class Settings(BaseSettings):
     BOT_TOKEN: str
     WEBHOOK_URL: str
-    DATABASE_URL: str
+    DATABASE_URL: str = "sqlite+aiosqlite:///./db.sqlite3"
 
     class Config:
         env_file = ".env"
