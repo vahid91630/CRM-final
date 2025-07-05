@@ -4,4 +4,4 @@ sqlalchemy
 aiogram
 python-dotenv
 requests
-aiosqlite
+pydantic-settings
