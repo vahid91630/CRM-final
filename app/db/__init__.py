@@ -1,5 +1,9 @@
-from .models import Base
-from .session import engine
+from .session import get_db, engine
+from .base_class import Base
+from .models import *  # اگر مدل‌ها در یک فایل مجزا هستن، این خط باید درست اشاره کنه
 
-# Auto create all tables when package is imported
-Base.metadata.create_all(bind=engine)
+__all__ = [
+    "get_db",
+    "engine",
+    "Base",
+]
