@@ -1,26 +1,40 @@
-from fastapi import APIRouter, Request
-import httpx
-from app.config import BOT_TOKEN
+from aiogram import Bot, Dispatcher, types
+from aiogram.types import Message
+from aiogram.fsm.storage.memory import MemoryStorage
+from aiogram.fsm.context import FSMContext
+from aiogram.fsm.state import StatesGroup, State
+from aiogram import Router
+import asyncio
+import os
 
-telegram_router = APIRouter()
+BOT_TOKEN = os.getenv("BOT_TOKEN")
+WEBHOOK_URL = os.getenv("WEBHOOK_URL")
 
-TELEGRAM_API_URL = f"https://api.telegram.org/bot{BOT_TOKEN}"
+bot = Bot(token=BOT_TOKEN, parse_mode="HTML")
+dp = Dispatcher(storage=MemoryStorage())
 
-@telegram_router.post("/")
-async def receive_update(update: dict):
-    message = update.get("message", {})
-    chat_id = message.get("chat", {}).get("id")
-    text = message.get("text", "")
+router = Router()
+dp.include_router(router)
 
-    if not chat_id or not text:
-        return {"ok": False, "message": "داده نامعتبر"}
+# استارت اولیه
+@router.message(commands=["start"])
+async def start_handler(message: Message, state: FSMContext):
+    await message.answer("سلام! خوش اومدی به سیستم مدیریت مشتری 😊\nاسمت چیه؟")
+    await state.set_state(UserForm.ask_name)
 
-    response_text = f"✅ پیام شما دریافت شد:\n{text}"
+class UserForm(StatesGroup):
+    ask_name = State()
+    ask_help = State()
 
-    async with httpx.AsyncClient() as client:
-        await client.post(f"{TELEGRAM_API_URL}/sendMessage", json={
-            "chat_id": chat_id,
-            "text": response_text
-        })
+# گرفتن نام
+@router.message(UserForm.ask_name)
+async def name_handler(message: Message, state: FSMContext):
+    await state.update_data(name=message.text)
+    await message.answer(f"خیلی خوب {message.text} عزیز 👌\nچطور می‌تونم کمکت کنم؟")
+    await state.set_state(UserForm.ask_help)
 
-    return {"ok": True}
+# گرفتن درخواست بعدی
+@router.message(UserForm.ask_help)
+async def help_handler(message: Message, state: FSMContext):
+    await message.answer("در حال آماده‌سازی درخواست شما هستم...")
+    # در آینده با دیتابیس و مدیریت فروشنده اتصال پیدا خواهد کرد
