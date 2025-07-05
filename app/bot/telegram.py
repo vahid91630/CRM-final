@@ -3,35 +3,39 @@ import requests
 from fastapi import APIRouter, Request
 from dotenv import load_dotenv
 
+from bot.handlers import handle_text_message
+
 load_dotenv()
 
 router = APIRouter()
-
-# توکن ربات
-BOT_TOKEN = "7847661218:AAEIHUcwg2gb7jF8zdK75w2Xk_exIewWAPU"
-BASE_URL = f"https://api.telegram.org/bot{BOT_TOKEN}"
-
-# پیام خوش‌آمد
-WELCOME_MESSAGE = "سلام دوست عزیز! 😊 خوش اومدی. لطفاً اسم کامل خودت رو برام بنویس."
-
-@router.post("/")
-async def receive_message(req: Request):
-    body = await req.json()
-    
-    if "message" in body:
-        chat_id = body["message"]["chat"]["id"]
-        text = body["message"].get("text", "")
-        
-        # پاسخ ساده به هر پیام
-        send_message(chat_id, WELCOME_MESSAGE)
-
-    return {"ok": True}
+TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
+BASE_URL = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}"
 
 
-def send_message(chat_id: int, text: str):
+@router.post("/webhook")
+async def telegram_webhook(req: Request):
+    data = await req.json()
+
+    message = data.get("message")
+    if not message:
+        return {"status": "no message"}
+
+    chat_id = message["chat"]["id"]
+    text = message.get("text", "")
+
+    response_text = handle_text_message(chat_id, text)
+    send_message(chat_id, response_text)
+
+    return {"status": "ok"}
+
+
+def send_message(chat_id: int, text: str) -> None:
     url = f"{BASE_URL}/sendMessage"
     payload = {
         "chat_id": chat_id,
         "text": text
     }
-    requests.post(url, json=payload)
+    try:
+        requests.post(url, json=payload)
+    except Exception as e:
+        print("Error sending message:", e)
