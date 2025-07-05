@@ -1,2 +1,6 @@
-from .customer import Customer
-from .user import User
+# bot/__init__.py
+# این فایل برای شناسایی پوشه bot به‌عنوان یک پکیج پایتون ایجاد شده است.
+# در صورت نیاز می‌توانید importهای پایه را اینجا بیاورید.
+
+# مثال:
+# from .telegram_bot import bot
