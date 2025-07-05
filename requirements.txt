@@ -1,5 +1,4 @@
 fastapi
-uvicorn
-aiogram
 python-dotenv
-sqlalchemy
+requests
+uvicorn
