@@ -1,6 +1,10 @@
-import os
-from dotenv import load_dotenv
+from pydantic import BaseSettings
 
-load_dotenv()
+class Settings(BaseSettings):
+    bot_token: str
+    database_url: str
 
-BOT_TOKEN: str = os.getenv("BOT_TOKEN", "")
+    class Config:
+        env_file = ".env"
+
+settings = Settings()
