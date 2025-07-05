@@ -1,6 +1,6 @@
 fastapi
 uvicorn
+sqlalchemy
 aiogram
 pydantic-settings
-sqlalchemy
-aiosqlite
+aiofiles
