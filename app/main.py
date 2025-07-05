@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from app.bot.telegram import dp, bot
+import os
 
 app = FastAPI()
 
