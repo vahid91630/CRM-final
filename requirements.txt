@@ -5,3 +5,4 @@ aiogram==2.25.2
 aiohttp==3.8.6
 pydantic-settings
 aiofiles
+sentry-sdk==1.45.0
