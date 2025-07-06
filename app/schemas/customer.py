@@ -1,14 +1,14 @@
 from pydantic import BaseModel
-from typing import Optional
 
 class CustomerBase(BaseModel):
     name: str
     email: str
+    phone: str
 
 class CustomerCreate(CustomerBase):
     pass
 
-class CustomerResponse(CustomerBase):
+class CustomerRead(CustomerBase):
     id: int
 
     class Config:
