@@ -1,7 +1,10 @@
 from fastapi import APIRouter
 
-router = APIRouter()
+router = APIRouter(
+    prefix="/customers",
+    tags=["Customers"]
+)
 
-@router.get("/customers")
-async def get_customers():
-    return {"message": "Customers endpoint"}
+@router.get("/")
+async def list_customers():
+    return {"customers": ["Alice", "Bob", "Charlie"]}
