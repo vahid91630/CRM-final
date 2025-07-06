@@ -1,22 +1,22 @@
 FROM python:3.11-slim
 
-# Set working directory
 WORKDIR /app
 
-# Install system dependencies required for building some Python packages
+# نصب دیپندنسی‌های سیستمی برای build و پکیج‌هایی مثل aiohttp، uvicorn، yarl
 RUN apt-get update && \
-    apt-get install -y gcc libpq-dev build-essential python3-dev curl && \
+    apt-get install -y gcc libpq-dev build-essential libffi-dev \
+                       libssl-dev curl && \
     rm -rf /var/lib/apt/lists/*
 
-# Copy requirements first (for better Docker caching)
+# کپی فایل پکیج‌ها
 COPY requirements.txt .
 
-# Install Python dependencies
+# نصب پکیج‌ها
 RUN pip install --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt
 
-# Copy full project files
+# کپی فایل‌های پروژه
 COPY . .
 
-# Run the FastAPI app with uvicorn
+# اجرای اپلیکیشن
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
