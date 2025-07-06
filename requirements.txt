@@ -1,6 +1,6 @@
 fastapi
 uvicorn
 sqlalchemy
-aiogram
+aiogram==2.25.2
 pydantic-settings
 aiofiles
