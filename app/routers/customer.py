@@ -1,48 +1,26 @@
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.future import select
+from fastapi import APIRouter, HTTPException
+from sqlalchemy.orm import Session
 from app.db.database import get_db
-from app.models.customer import Customer
-from app.schemas.customer import CustomerCreate, CustomerRead
-from typing import List
+from app.models import customer as models
+from app.schemas import customer as schemas
+from fastapi import Depends
 
-router = APIRouter(prefix="/customers", tags=["customers"])
+router = APIRouter(
+    prefix="/customers",
+    tags=["customers"]
+)
 
-@router.post("/", response_model=CustomerRead)
-async def create_customer(
-    customer: CustomerCreate,
-    db: AsyncSession = Depends(get_db)
-):
-    new_customer = Customer(
-        full_name=customer.full_name,
-        phone_number=customer.phone_number,
-        email=customer.email
-    )
-    db.add(new_customer)
-    await db.commit()
-    await db.refresh(new_customer)
-    return new_customer
+@router.post("/", response_model=schemas.Customer)
+def create_customer(customer: schemas.CustomerCreate, db: Session = Depends(get_db)):
+    db_customer = models.Customer(**customer.dict())
+    db.add(db_customer)
+    db.commit()
+    db.refresh(db_customer)
+    return db_customer
 
-@router.get("/", response_model=List[CustomerRead])
-async def get_customers(db: AsyncSession = Depends(get_db)):
-    result = await db.execute(select(Customer))
-    customers = result.scalars().all()
-    return customers
-
-@router.get("/{customer_id}", response_model=CustomerRead)
-async def get_customer(customer_id: int, db: AsyncSession = Depends(get_db)):
-    result = await db.execute(select(Customer).where(Customer.id == customer_id))
-    customer = result.scalar_one_or_none()
-    if not customer:
+@router.get("/{customer_id}", response_model=schemas.Customer)
+def read_customer(customer_id: int, db: Session = Depends(get_db)):
+    customer = db.query(models.Customer).filter(models.Customer.id == customer_id).first()
+    if customer is None:
         raise HTTPException(status_code=404, detail="Customer not found")
     return customer
-
-@router.delete("/{customer_id}")
-async def delete_customer(customer_id: int, db: AsyncSession = Depends(get_db)):
-    result = await db.execute(select(Customer).where(Customer.id == customer_id))
-    customer = result.scalar_one_or_none()
-    if not customer:
-        raise HTTPException(status_code=404, detail="Customer not found")
-    await db.delete(customer)
-    await db.commit()
-    return {"detail": "Customer deleted"}
