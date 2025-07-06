@@ -1,10 +1,15 @@
-from fastapi import FastAPI
-from app.routers import customer
+from pydantic import BaseModel
 
-app = FastAPI()
+class CustomerBase(BaseModel):
+    full_name: str
+    phone_number: str
+    email: str
 
-app.include_router(customer.router)
+class CustomerCreate(CustomerBase):
+    pass
 
-@app.get("/")
-async def root():
-    return {"message": "CRM Backend is running"}
+class CustomerRead(CustomerBase):
+    id: int
+
+    class Config:
+        orm_mode = True
