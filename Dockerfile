@@ -2,12 +2,12 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-# نصب وابستگی‌های سیستمی
+# نصب وابستگی‌های سیستمی موردنیاز برای build پکیج‌ها
 RUN apt-get update && \
-    apt-get install -y gcc libpq-dev build-essential libffi-dev libssl-dev && \
+    apt-get install -y gcc libpq-dev build-essential libffi-dev libssl-dev curl && \
     rm -rf /var/lib/apt/lists/*
 
-# نصب پکیج‌ها
+# کپی فایل requirements و نصب پکیج‌ها
 COPY requirements.txt .
 RUN pip install --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt
