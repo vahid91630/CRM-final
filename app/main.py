@@ -1,15 +1,17 @@
 from fastapi import FastAPI
-from app.config import settings
-from app.bot.telegram_bot import bot_router
-from app.db.session import engine
-from app.db.base import Base
+from app.routes.customer import router as customer_router
+from app.db.database import engine, Base
+import asyncio
 import uvicorn
 
 app = FastAPI()
 
-Base.metadata.create_all(bind=engine)
+@app.on_event("startup")
+async def startup_event():
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
 
-app.include_router(bot_router)
+app.include_router(customer_router, prefix="/customers")
 
 if __name__ == "__main__":
-    uvicorn.run("app.main:app", host="0.0.0.0", port=8000)
+    uvicorn.run("app.main:app", host="0.0.0.0", port=8000, reload=True)
