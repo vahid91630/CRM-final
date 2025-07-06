@@ -1,15 +1,15 @@
-from pydantic import BaseModel
+from fastapi import FastAPI
+from app.config import settings
+from app.bot.telegram_bot import bot_router
+from app.db.session import engine
+from app.db.base import Base
+import uvicorn
 
-class CustomerBase(BaseModel):
-    full_name: str
-    phone_number: str
-    email: str
+app = FastAPI()
 
-class CustomerCreate(CustomerBase):
-    pass
+Base.metadata.create_all(bind=engine)
 
-class CustomerRead(CustomerBase):
-    id: int
+app.include_router(bot_router)
 
-    class Config:
-        orm_mode = True
+if __name__ == "__main__":
+    uvicorn.run("app.main:app", host="0.0.0.0", port=8000)
