@@ -3,5 +3,7 @@ uvicorn[standard]
 sqlalchemy>=1.4
 asyncpg
 python-dotenv
-aiohttp
+aiohttp==3.8.6 --only-binary :all:
+yarl==1.9.3 --only-binary :all:
+multidict==6.0.5 --only-binary :all:
 aiogram==2.25.1
