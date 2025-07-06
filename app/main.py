@@ -1,40 +1,28 @@
 import os
-import logging
-from fastapi import FastAPI, Request
-from aiogram import Bot, Dispatcher, types
-from aiogram.types import Update
+from fastapi import FastAPI
 from dotenv import load_dotenv
+import sentry_sdk
+from sentry_sdk.integrations.asgi import SentryAsgiMiddleware
 
-# .env مقادیر محیطی رو بارگذاری کن
+from app.routers import customer
+
 load_dotenv()
 
-# لاگ‌گذاری حرفه‌ای
-logging.basicConfig(
-    level=logging.DEBUG,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+sentry_sdk.init(
+    dsn=os.getenv("SENTRY_DSN"),
+    traces_sample_rate=1.0,
+    environment="production"
 )
 
-logger = logging.getLogger(__name__)
-
-bot = Bot(token=os.getenv("BOT_TOKEN"))
-dp = Dispatcher(bot)
-
 app = FastAPI()
+app = SentryAsgiMiddleware(app)
 
-@app.on_event("startup")
-async def on_startup():
-    logger.info("🌐 Bot is starting...")
-    webhook_url = os.getenv("WEBHOOK_URL")
-    if webhook_url:
-        await bot.set_webhook(webhook_url)
-        logger.info(f"Webhook set to {webhook_url}")
-    else:
-        logger.warning("WEBHOOK_URL is not set in .env")
+app.include_router(customer.router)
 
-@app.post("/bot")
-async def telegram_webhook(request: Request):
-    body = await request.json()
-    logger.debug(f"📨 Incoming update: {body}")
-    update = Update.to_object(body)
-    await dp.process_update(update)
-    return {"ok": True}
+@app.get("/")
+async def root():
+    return {"message": "CRM running"}
+
+@app.get("/crash")
+async def crash():
+    raise Exception("Test Error")
