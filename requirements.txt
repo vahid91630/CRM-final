@@ -1,8 +1,7 @@
 fastapi
-uvicorn
-sqlalchemy
-aiogram==2.25.2
-aiohttp==3.8.6
-pydantic-settings
-aiofiles
-sentry-sdk==1.45.0
+uvicorn[standard]
+sqlalchemy>=1.4
+asyncpg
+python-dotenv
+aiohttp
+aiogram==2.25.1
