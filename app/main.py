@@ -1,16 +1,17 @@
-import asyncio
-from aiogram import Bot, Dispatcher
-from app.config import settings
-from app.bot.handlers import message
+import uvicorn
+from fastapi import FastAPI
+from app.routers.customer_router import router as customer_router
+from app.database.base import Base
+from app.database.session import engine
 
-bot = Bot(token=settings.BOT_TOKEN)
-dp = Dispatcher()
+app = FastAPI()
 
-dp.include_router(message.router)
+app.include_router(customer_router)
 
-async def main():
-    await bot.delete_webhook(drop_pending_updates=True)
-    await dp.start_polling(bot)
+@app.on_event("startup")
+async def on_startup():
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    uvicorn.run("main:app", host="0.0.0.0", port=8000)
