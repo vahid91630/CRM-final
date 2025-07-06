@@ -1,14 +1,9 @@
 services:
   - type: web
-    name: crm-app
+    name: fastapi-crm
     env: docker
+    repo: https://github.com/vahid91630/CRM-final
+    region: oregon
     plan: free
-    dockerfilePath: Dockerfile
-    envVars:
-      - key: DATABASE_URL
-        fromDotEnv: true
-      - key: BOT_TOKEN
-        fromDotEnv: true
-      - key:WEBHOOK_SECRET
-        fromDotEnv: true
+    branch: main
     autoDeploy: true
