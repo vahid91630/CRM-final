@@ -1,9 +1,14 @@
 services:
   - type: web
-    name: your-app-name
+    name: crm-app
     env: docker
     plan: free
-    dockerfilePath: ./Dockerfile
-    region: oregon
-    branch: main
+    dockerfilePath: Dockerfile
+    envVars:
+      - key: DATABASE_URL
+        fromDotEnv: true
+      - key: BOT_TOKEN
+        fromDotEnv: true
+      - key:WEBHOOK_SECRET
+        fromDotEnv: true
     autoDeploy: true
