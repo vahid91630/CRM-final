@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: your-app-name
+    env: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    region: oregon
+    branch: main
+    autoDeploy: true
