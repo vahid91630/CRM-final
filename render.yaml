@@ -2,7 +2,7 @@ services:
   - type: web
     name: fastapi-crm
     env: docker
-    repo: https://github.com/vahid91630/CRM-final
+    repo: https://github.com/va***your-repo-link***
     region: oregon
     plan: free
     branch: main
