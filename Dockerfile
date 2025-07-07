@@ -1,19 +1,20 @@
+# 1. Base image
 FROM python:3.11-slim
 
+# 2. Set working directory
 WORKDIR /app
 
-# نصب پیش‌نیازهای سیستمی برای کامپایل
-RUN apt-get update && \
-    apt-get install -y gcc libpq-dev build-essential && \
-    rm -rf /var/lib/apt/lists/*
-
-# نصب پکیج‌های پایتونی
+# 3. Copy requirements first and install dependencies
 COPY requirements.txt .
+
 RUN pip install --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt
 
-# کپی کامل پروژه
+# 4. Copy the whole project
 COPY . .
 
-# اجرای اپلیکیشن
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+# 5. Expose port
+EXPOSE 8000
+
+# 6. Start the app (main.py is inside app/)
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
