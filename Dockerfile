@@ -1,20 +1,20 @@
 FROM python:3.11-slim
 
+# Set working directory
 WORKDIR /app
 
-# System dependencies
+# Install system dependencies
 RUN apt-get update && \
-    apt-get install -y gcc libpq-dev build-essential curl libffi-dev && \
+    apt-get install -y gcc libpq-dev build-essential && \
     rm -rf /var/lib/apt/lists/*
 
-# Copy only requirements file first
+# Copy requirements and install Python dependencies
 COPY requirements.txt .
-
-# Debug pip install
 RUN pip install --upgrade pip && \
-    pip install --no-cache-dir -r requirements.txt || (echo "❌ Pip install failed" && ls -l && cat requirements.txt && true)
+    pip install --no-cache-dir -r requirements.txt
 
-# Now copy rest of project
+# Copy rest of the project
 COPY . .
 
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Run the FastAPI app
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
