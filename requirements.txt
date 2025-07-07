@@ -1,3 +1,9 @@
+fastapi
+uvicorn[standard]
+sqlalchemy>=1.4
+asyncpg
+python-dotenv
 aiohttp==3.8.5
 yarl==1.8.2
 multidict==6.0.4
+aiogram==2.25.1
