@@ -16,5 +16,6 @@ RUN pip install --upgrade pip && \
 # Copy rest of the project
 COPY . .
 
-# Run the FastAPI app
+# Run the FastAPI 
+
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
