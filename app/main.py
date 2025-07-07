@@ -5,7 +5,6 @@ from app.database.base import Base
 from app.database.session import engine
 
 app = FastAPI()
-
 app.include_router(customer_router)
 
 @app.on_event("startup")
