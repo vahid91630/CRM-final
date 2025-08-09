@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="fa">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>داشبورد سیستم CRM</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Tahoma', 'Arial', sans-serif;
+            background-color: #f5f5f5;
+            direction: rtl;
+            text-align: right;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px 0;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 20px;
+        }
+        
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+        }
+        
+        .card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .card-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #333;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+        
+        .stat-number {
+            font-size: 36px;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+        
+        .stat-label {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-left: 8px;
+        }
+        
+        .status-healthy { background-color: #28a745; }
+        .status-warning { background-color: #ffc107; }
+        .status-error { background-color: #dc3545; }
+        
+        .report-section {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .refresh-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px 0;
+            font-size: 14px;
+        }
+        
+        .refresh-btn:hover {
+            background: #5a6fd8;
+        }
+        
+        .loading {
+            text-align: center;
+            color: #666;
+            padding: 20px;
+        }
+        
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        
+        .customer-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .customer-item {
+            border-bottom: 1px solid #eee;
+            padding: 10px 0;
+        }
+        
+        .customer-item:last-child {
+            border-bottom: none;
+        }
+        
+        .customer-name {
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .customer-details {
+            color: #666;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>داشبورد سیستم مدیریت ارتباط با مشتری (CRM)</h1>
+        <p>مانیتورینگ و گزارشات سیستم</p>
+    </div>
+
+    <div class="container">
+        <button class="refresh-btn" onclick="refreshDashboard()">بروزرسانی داده‌ها</button>
+        
+        <div class="dashboard-grid" id="dashboardGrid">
+            <div class="card">
+                <div class="card-title">آمار کلی مشتریان</div>
+                <div class="loading" id="totalCustomersLoading">در حال بارگذاری...</div>
+                <div id="totalCustomersContent" style="display: none;">
+                    <div class="stat-number" id="totalCustomers">0</div>
+                    <div class="stat-label">کل مشتریان</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">مشتریان امروز</div>
+                <div class="loading" id="todayCustomersLoading">در حال بارگذاری...</div>
+                <div id="todayCustomersContent" style="display: none;">
+                    <div class="stat-number" id="todayCustomers">0</div>
+                    <div class="stat-label">ثبت نام امروز</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">مشتریان این هفته</div>
+                <div class="loading" id="weekCustomersLoading">در حال بارگذاری...</div>
+                <div id="weekCustomersContent" style="display: none;">
+                    <div class="stat-number" id="weekCustomers">0</div>
+                    <div class="stat-label">ثبت نام این هفته</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">وضعیت سیستم</div>
+                <div class="loading" id="systemHealthLoading">در حال بررسی...</div>
+                <div id="systemHealthContent" style="display: none;">
+                    <div style="margin-bottom: 10px;">
+                        <span class="status-indicator" id="systemStatus"></span>
+                        <span id="systemStatusText">نامشخص</span>
+                    </div>
+                    <div class="stat-label">
+                        زمان پاسخ پایگاه داده: <span id="dbResponseTime">-</span> میلی‌ثانیه
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="report-section">
+            <div class="card-title">گزارش جامع مشتریان</div>
+            <div class="loading" id="customerReportLoading">در حال تولید گزارش...</div>
+            <div id="customerReportContent" style="display: none;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+                    <div>
+                        <h4>آمار ایمیل</h4>
+                        <p>دارای ایمیل: <span id="withEmail">0</span></p>
+                        <p>بدون ایمیل: <span id="withoutEmail">0</span></p>
+                    </div>
+                    <div>
+                        <h4>مشتریان اخیر</h4>
+                        <div class="customer-list" id="recentCustomers">
+                            <!-- Recent customers will be populated here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = '/dashboard';
+
+        async function fetchDashboardData() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/`);
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    document.getElementById('totalCustomers').textContent = data.data.total_customers;
+                    document.getElementById('todayCustomers').textContent = data.data.today_customers;
+                    document.getElementById('weekCustomers').textContent = data.data.week_customers;
+                    
+                    // Hide loading and show content
+                    document.getElementById('totalCustomersLoading').style.display = 'none';
+                    document.getElementById('totalCustomersContent').style.display = 'block';
+                    document.getElementById('todayCustomersLoading').style.display = 'none';
+                    document.getElementById('todayCustomersContent').style.display = 'block';
+                    document.getElementById('weekCustomersLoading').style.display = 'none';
+                    document.getElementById('weekCustomersContent').style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Error fetching dashboard data:', error);
+                showError('خطا در دریافت آمار داشبورد');
+            }
+        }
+
+        async function fetchSystemHealth() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/monitoring/health`);
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    const systemStatusElement = document.getElementById('systemStatus');
+                    const systemStatusText = document.getElementById('systemStatusText');
+                    const dbResponseTime = document.getElementById('dbResponseTime');
+                    
+                    if (data.data.system_status === 'operational') {
+                        systemStatusElement.className = 'status-indicator status-healthy';
+                        systemStatusText.textContent = 'سیستم سالم';
+                    } else {
+                        systemStatusElement.className = 'status-indicator status-warning';
+                        systemStatusText.textContent = 'سیستم نیازمند توجه';
+                    }
+                    
+                    dbResponseTime.textContent = data.data.database.response_time_ms || '-';
+                    
+                    document.getElementById('systemHealthLoading').style.display = 'none';
+                    document.getElementById('systemHealthContent').style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Error fetching system health:', error);
+                const systemStatusElement = document.getElementById('systemStatus');
+                systemStatusElement.className = 'status-indicator status-error';
+                document.getElementById('systemStatusText').textContent = 'خطا در دریافت وضعیت';
+            }
+        }
+
+        async function fetchCustomerReports() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/reports/customers`);
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    document.getElementById('withEmail').textContent = data.data.email_statistics.with_email;
+                    document.getElementById('withoutEmail').textContent = data.data.email_statistics.without_email;
+                    
+                    // Populate recent customers
+                    const recentCustomersContainer = document.getElementById('recentCustomers');
+                    recentCustomersContainer.innerHTML = '';
+                    
+                    data.data.recent_customers.forEach(customer => {
+                        const customerDiv = document.createElement('div');
+                        customerDiv.className = 'customer-item';
+                        customerDiv.innerHTML = `
+                            <div class="customer-name">${customer.full_name}</div>
+                            <div class="customer-details">
+                                تلفن: ${customer.phone_number} | 
+                                ایمیل: ${customer.email || 'ندارد'}
+                            </div>
+                        `;
+                        recentCustomersContainer.appendChild(customerDiv);
+                    });
+                    
+                    document.getElementById('customerReportLoading').style.display = 'none';
+                    document.getElementById('customerReportContent').style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Error fetching customer reports:', error);
+                showError('خطا در دریافت گزارش مشتریان');
+            }
+        }
+
+        function showError(message) {
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'error';
+            errorDiv.textContent = message;
+            document.querySelector('.container').insertBefore(errorDiv, document.querySelector('.dashboard-grid'));
+            
+            // Remove error after 5 seconds
+            setTimeout(() => {
+                errorDiv.remove();
+            }, 5000);
+        }
+
+        function refreshDashboard() {
+            // Reset loading states
+            const loadingElements = document.querySelectorAll('.loading');
+            const contentElements = document.querySelectorAll('[id$="Content"]');
+            
+            loadingElements.forEach(el => el.style.display = 'block');
+            contentElements.forEach(el => el.style.display = 'none');
+            
+            // Fetch all data
+            fetchDashboardData();
+            fetchSystemHealth();
+            fetchCustomerReports();
+        }
+
+        // Initialize dashboard on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            refreshDashboard();
+            
+            // Auto-refresh every 30 seconds
+            setInterval(refreshDashboard, 30000);
+        });
+    </script>
+</body>
+</html>
