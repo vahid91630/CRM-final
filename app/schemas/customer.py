@@ -12,3 +12,7 @@ class CustomerOut(CustomerBase):
 
     class Config:
         orm_mode = True
+
+# Aliases for compatibility
+CustomerRead = CustomerOut
+CustomerResponse = CustomerOut

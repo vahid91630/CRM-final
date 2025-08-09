@@ -2,8 +2,8 @@ import uvicorn
 from fastapi import FastAPI
 
 from app.routers.customer_router import router as customer_router
-from app.database.base import Base
-from app.database.session import engine
+from app.db.base import Base
+from app.db.session import engine
 
 app = FastAPI(title="CRM API")
 
