@@ -2,7 +2,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy import update, delete
 from app.models.customer import Customer
-from app.schemas.customer_schema import CustomerCreate, CustomerUpdate
+from app.schemas.customer import CustomerCreate, CustomerUpdate
 
 async def create_customer(db: AsyncSession, customer: CustomerCreate) -> Customer:
     new_customer = Customer(**customer.dict())
@@ -14,6 +14,10 @@ async def create_customer(db: AsyncSession, customer: CustomerCreate) -> Custome
 async def get_customer(db: AsyncSession, customer_id: int) -> Customer | None:
     result = await db.execute(select(Customer).where(Customer.id == customer_id))
     return result.scalars().first()
+
+async def get_customer_by_telegram_id(db: AsyncSession, telegram_id: int) -> Customer | None:
+    # For now, using customer_id as telegram_id since there's no separate telegram_id field
+    return await get_customer(db, telegram_id)
 
 async def get_all_customers(db: AsyncSession) -> list[Customer]:
     result = await db.execute(select(Customer))
